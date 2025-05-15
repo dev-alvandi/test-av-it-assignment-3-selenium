@@ -55,7 +55,7 @@ public class ImageSearchTest {
     @Test
     public void searchIsCaseInsensitive() {
         WebElement input = driver.findElement(By.name("search_terms"));
-        input.sendKeys("CAT");
+        input.sendKeys("Empire".toUpperCase());
         driver.findElement(By.cssSelector("button[type='submit']")).click();
         WebElement resultsContainer = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.id("searchResultsContainer")));
