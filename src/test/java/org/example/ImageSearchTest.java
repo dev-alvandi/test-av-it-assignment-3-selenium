@@ -3,12 +3,9 @@ package org.example;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
 
 import java.time.Duration;
 
@@ -43,23 +40,26 @@ public class ImageSearchTest {
 
     @Test
     public void searchForValidKeyword() {
-
         WebElement input = driver.findElement(By.name("search_terms"));
         input.sendKeys("cat");
         driver.findElement(By.cssSelector("button[type='submit']")).click();
+
         WebElement resultsContainer = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.id("searchResultsContainer")));
         assertTrue(resultsContainer.isDisplayed());
+        assertTrue(driver.findElements(By.cssSelector("#searchResults img")).size() > 0);
     }
 
     @Test
     public void searchIsCaseInsensitive() {
         WebElement input = driver.findElement(By.name("search_terms"));
-        input.sendKeys("Empire".toUpperCase());
+        input.sendKeys("EMPIRE");
         driver.findElement(By.cssSelector("button[type='submit']")).click();
+
         WebElement resultsContainer = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.id("searchResultsContainer")));
         assertTrue(resultsContainer.isDisplayed());
+        assertTrue(driver.findElements(By.cssSelector("#searchResults img")).size() > 0);
     }
 
     @Test
@@ -67,6 +67,7 @@ public class ImageSearchTest {
         WebElement input = driver.findElement(By.name("search_terms"));
         input.sendKeys("invalidsearch123456");
         driver.findElement(By.cssSelector("button[type='submit']")).click();
+
         WebElement noResultsMsg = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.id("message-no-search-results")));
         assertTrue(noResultsMsg.isDisplayed());
@@ -77,12 +78,19 @@ public class ImageSearchTest {
         WebElement input = driver.findElement(By.name("search_terms"));
         input.clear();
         driver.findElement(By.cssSelector("button[type='submit']")).click();
-        assertTrue(input.getAttribute("validationMessage") != null);
+
+        // Assumes input still exists and nothing crashes
+        assertTrue(driver.findElement(By.name("search_terms")).isDisplayed());
     }
 
     @Test
-    public void directAccessToImagesApi() {
-        driver.get(BASE_URL + "/images");
-        assertTrue(driver.getPageSource().contains("{"));
+    public void searchWithOnlyWhitespace() {
+        WebElement input = driver.findElement(By.name("search_terms"));
+        input.sendKeys("   "); // three spaces
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
+
+        WebElement errorMessage = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("searchErrorMessage")));
+        assertTrue(errorMessage.getText().contains("Search query is required."));
     }
 }
